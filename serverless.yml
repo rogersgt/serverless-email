@@ -1,0 +1,69 @@
+service: serverless-email
+frameworkVersion: ">=1.0.0 <2.0.0"
+
+provider:
+  name: aws
+  runtime: nodejs6.10
+  logRetentionInDays: 3 # Set the default RetentionInDays for a CloudWatch LogGroup
+  apiKeys:
+    - email_${opt:stage}
+  region: us-east-1
+  profile: rogers
+  stage: ${opt:stage, 'dev'}
+
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - "ses:*"
+      Resource: "*"
+    - Effect: "Allow"
+      Action:
+        - "s3:ListBuckets"
+        - "s3:PutObject"
+        - "s3:ListObjects"
+        - "s3:GetObject"
+      Resource: "*"
+
+package:
+ include:
+   - dist/**
+ exclude:
+   - .env
+   - .gitignore
+   - package.json
+   - yarn.lock
+   - .babelrc
+   - env.json
+   - README.md
+
+
+functions:
+  mail:
+    handler: dist/handler.mail
+    vpc:
+      securityGroupIds:
+        - sg-d57018a5
+      subnetIds:
+        - subnet-91c189cb
+        - subnet-9c4c84f8
+        - subnet-23bfaa6b
+        - subnet-e8876fd7
+    environment:
+     NODE_ENV: ${file(./env.json):NODE_ENV}
+     TO_EMAIL: ${file(./env.json):TO_EMAIL}
+     FROM_EMAIL: ${file(./env.json):FROM_EMAIL}
+    events:
+      - http:
+          path: /send
+          method: post
+          cors:
+            origin: '*'
+            headers:
+              - Content-Type
+              - X-Amz-Date
+              - Authorization
+              - X-Api-Key
+              - X-Amz-Security-Token
+              - X-Amz-User-Agent
+            allowCredentials: true
+          private: true
