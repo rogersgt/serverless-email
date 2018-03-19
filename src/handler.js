@@ -14,7 +14,7 @@ function messageIsGood(body) {
   return false;
 }
 
-module.exports.mail = function (event, context, callback) {
+module.exports.mail = async function (event, context, callback) {
   const data = JSON.parse(event.body);
   const goodRequest = messageIsGood(data);
 
@@ -39,7 +39,7 @@ module.exports.mail = function (event, context, callback) {
       ReplyToAddresses: [data.email]
     };
 
-    // const sesResponse = await ses.sendEmail(emailParams).promise();
+    const sesResponse = await ses.sendEmail(emailParams).promise();
 
     callback(null, {
       statusCode: 204,

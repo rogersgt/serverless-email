@@ -7,8 +7,8 @@ provider:
   logRetentionInDays: 3 # Set the default RetentionInDays for a CloudWatch LogGroup
   apiKeys:
     - email_${opt:stage}
-  region: us-east-1
-  profile: rogers
+  region: us-west-2
+  profile: ${opt:profile}
   stage: ${opt:stage, 'dev'}
 
   iamRoleStatements:
@@ -40,14 +40,6 @@ package:
 functions:
   mail:
     handler: dist/handler.mail
-    vpc:
-      securityGroupIds:
-        - sg-d57018a5
-      subnetIds:
-        - subnet-91c189cb
-        - subnet-9c4c84f8
-        - subnet-23bfaa6b
-        - subnet-e8876fd7
     environment:
      NODE_ENV: ${file(./env.json):NODE_ENV}
      TO_EMAIL: ${file(./env.json):TO_EMAIL}
